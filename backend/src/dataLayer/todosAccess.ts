@@ -96,15 +96,22 @@ export class TodosAccess {
     }
 
     async generateUploadUrl(todoId: string): Promise<string> {
-        console.log("Generating URL");
+      const uploadUrl = this.s3Client.getSignedUrl("putObject", {
+        Bucket: this.s3Bucket,
+        Key: todoId,
+        Expires: 1000
+    });
+    await this.docClient.update({
+          TableName: this.todoTable,
+          Key: { todoId },
+          UpdateExpression: "set attachmentUrl=:URL",
+          ExpressionAttributeValues: {
+            ":URL": uploadUrl.split("?")[0]
+        },
+        ReturnValues: "UPDATED_NEW"
+      })
+      .promise();
 
-        const url = this.s3Client.getSignedUrl('putObject', {
-            Bucket: this.s3Bucket,
-            Key: todoId,
-            Expires: 1000,
-        });
-        console.log(url);
-
-        return url as string;
-    }
+      return uploadUrl;
+}
 }

@@ -39,41 +39,22 @@ provider:
   #           - xray:PutTelemetryRecords
   #           - xray:PutTraceSegments
   #         Resource: "*"
+
+
 custom:
   documentation:
     api:
       info:
         version: '1.0.0'
         title: serverless-api
-        description: serverless-api
-    models:
-      - name: CreateTodoRequest
-        contentType: "application/json"
-        schema:
-          required:
-            - name
-            - dueDate
-          properties:
-            name:
-              minLength: 1
-              type: string
-            dueDate:
-              type: string
-      - name: UpdateTodoRequest
-        contentType: "application/json"
-        schema:
-          required:
-            - name
-            - dueDate
-            - done
-          properties:
-            name:
-              minLength: 1
-              type: string
-            dueDate:
-              type: string
-            done:
-              type: boolean
+        description: serverless application to manage Todo's
+#     models:
+#       - name: CreateTodoRequest
+#         contentType: "application/json"
+#         schema: ${file(models/create-todo-model.json)}
+#       - name: UpdateTodoRequest
+#         contentType: "application/json"
+#         schema: ${file(models/update-todo-model.json)}
 
 functions:
 
@@ -114,9 +95,12 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
-          requestModels:
-              application/json: CreateTodoRequest
-          reqValidatorName: RequestBodyValidator
+          # requestModels:
+          #     application/json: CreateTodoRequest
+          # reqValidatorName: RequestBodyValidator
+          request:
+            schemas:
+              application/json: ${file(models/create-todo-model.json)}
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-todo-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
@@ -142,9 +126,12 @@ functions:
           documentation:
             summary: "Update a todo item"
             description: "Update a todo item"
-            requestModels:
-              "application/json": UpdateTodoRequest
-          reqValidatorName: RequestBodyValidator
+          #   requestModels:
+          #     "application/json": UpdateTodoRequest
+          # reqValidatorName: RequestBodyValidator
+          request:
+            schemas:
+              application/json: ${file(models/update-todo-model.json)}
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-update-todo-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
